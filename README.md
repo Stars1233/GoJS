@@ -83,13 +83,13 @@ Diagrams are built by creating one or more templates, with desired properties da
 
   // define a simple Node template
   // the Shape will automatically surround the TextBlock
-  myDiagram.nodeTemplate = new go.Node('Auto')
-    .add(  // add a Shape and a TextBlock to this "Auto" Panel
-      new go.Shape('RoundedRectangle', { strokeWidth: 0, fill: 'white' }) // no border; default fill is white
-        .bind('fill', 'color'), // Shape.fill is bound to Node.data.color
-      new go.TextBlock({ margin: 8, font: 'bold 14px sans-serif', stroke: '#333' }) // some room around the text
-        .bind('text', 'key') // TextBlock.text is bound to Node.data.key
-    );
+  myDiagram.nodeTemplate = new go.Node('Auto').add(
+    // add a Shape and a TextBlock to this "Auto" Panel
+    new go.Shape('RoundedRectangle', { strokeWidth: 0, fill: 'white' }) // no border; default fill is white
+      .bind('fill', 'color'), // Shape.fill is bound to Node.data.color
+    new go.TextBlock({ margin: 8, font: 'bold 14px sans-serif', stroke: '#333' }) // some room around the text
+      .bind('text', 'key') // TextBlock.text is bound to Node.data.key
+  );
 
   // but use the default Link template, by not setting Diagram.linkTemplate
 
@@ -141,8 +141,16 @@ please visit Northwoods Software's <a href="https://nwoods.com/contact.html">con
 
 <h2>License</h2>
 
-The GoJS <a href="https://gojs.net/latest/license.html">software license</a>.
+GoJS is commercial software, not open-source.
 
-The GoJS <a href="https://gojs.net/latest/evaluationLicense.html">evaluation license</a>.
+As of September 2026, GoJS is free for individuals for non-commercial use, such as learning and hobby projects,
+under the <a href="https://gojs.net/latest/nonCommercialLicense.html">Non-Commercial Software License Agreement</a>.
 
-Copyright Northwoods Software Corporation
+See the <a href="https://gojs.net/latest/learn/deployment">deployment instructions</a> for non-commercial license keys.
+
+Use of GoJS by or on behalf of an organization, including any company, non-profit, educational institution,
+or government agency, is commercial use and requires a <a href="https://gojs.net/latest/pricing">purchased license</a>
+under the <a href="https://gojs.net/latest/license.html">software license</a>,
+or private evaluation under the <a href="https://gojs.net/latest/evaluationLicense.html">evaluation license</a>.
+
+Copyright, Northwoods Software Corporation

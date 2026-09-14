@@ -11,6 +11,44 @@
  */
 import go from 'gojs';
 /**
+ * This enumeration determines the distance metric by which heat spreads outward from a Part.
+ * Used for {@link HeatMap.metric}.
+ *
+ * Note: this enumeration only exists in extensionsJSM, not in extensions.
+ * @category Extension
+ */
+export var HeatMapMetric;
+(function (HeatMapMetric) {
+    /**
+     * Heat spreads by city-block distance, producing diamond-shaped halos.
+     */
+    HeatMapMetric[HeatMapMetric["Manhattan"] = 0] = "Manhattan";
+    /**
+     * Heat spreads by approximately Euclidean distance, producing approximately circular halos.
+     */
+    HeatMapMetric[HeatMapMetric["Euclidean"] = 1] = "Euclidean";
+})(HeatMapMetric || (HeatMapMetric = {}));
+/**
+ * This enumeration determines the coordinate system in which heat spread distances are measured.
+ * Used for {@link HeatMap.spreadUnits}.
+ *
+ * Note: this enumeration only exists in extensionsJSM, not in extensions.
+ * @category Extension
+ */
+export var HeatMapSpreadUnits;
+(function (HeatMapSpreadUnits) {
+    /**
+     * Heat spreads a fixed number of canvas pixels regardless of the Diagram.scale,
+     * one pixel per entry in {@link HeatMap.colors}.
+     */
+    HeatMapSpreadUnits[HeatMapSpreadUnits["Viewport"] = 0] = "Viewport";
+    /**
+     * Heat spreads a fixed distance in document coordinates, one document unit per entry
+     * in {@link HeatMap.colors}, so halos scale together with Parts as the user zooms.
+     */
+    HeatMapSpreadUnits[HeatMapSpreadUnits["Document"] = 1] = "Document";
+})(HeatMapSpreadUnits || (HeatMapSpreadUnits = {}));
+/**
  * A class for drawing a heat map based on the "temperatures" of Parts.
  *
  * This class adds a heat map image in the "ViewportForeground" Layer
@@ -62,6 +100,11 @@ export class HeatMap {
                 [0x00, 0x4f, 0xff, 30],
                 [0x00, 0x4f, 0xff, 5]
             ];
+        this._metric = HeatMapMetric.Manhattan;
+        this._spreadUnits = HeatMapSpreadUnits.Viewport;
+        this._chamferSize = 3;
+        this._field = null;
+        this._imgdata = null;
         this._updater = () => this.updateHeatMap();
         this._changer = (e) => {
             if (e.isTransactionFinished)
@@ -111,7 +154,6 @@ export class HeatMap {
         }
     }
     // Gets or sets the Array of Array of RGBA color numbers to use in forming gradients.
-    // Each Array representing a color must be different than the ones before it or after it.
     get colors() {
         return this._colors;
     }
@@ -123,6 +165,88 @@ export class HeatMap {
         }
         this._colors = value;
         this.updateHeatMap();
+    }
+    /**
+     * Gets or sets the distance metric by which heat spreads outward from each Part.
+     * {@link HeatMapMetric.Manhattan} produces diamond-shaped halos;
+     * {@link HeatMapMetric.Euclidean} produces approximately circular ones.
+     *
+     * The default value is {@link HeatMapMetric.Manhattan}.
+     */
+    get metric() {
+        return this._metric;
+    }
+    set metric(value) {
+        if (this.metric !== value &&
+            (value === HeatMapMetric.Manhattan || value === HeatMapMetric.Euclidean)) {
+            this._metric = value;
+            this.updateHeatMap();
+        }
+    }
+    /**
+     * Gets or sets the coordinate system in which heat spread distances are measured.
+     * {@link HeatMapSpreadUnits.Viewport} spreads one canvas pixel per {@link colors} entry,
+     * so halos keep the same size on screen regardless of zoom.
+     * {@link HeatMapSpreadUnits.Document} spreads one document unit per {@link colors} entry,
+     * so halos scale together with Parts as the user zooms.
+     *
+     * The default value is {@link HeatMapSpreadUnits.Viewport}.
+     */
+    get spreadUnits() {
+        return this._spreadUnits;
+    }
+    set spreadUnits(value) {
+        if (this.spreadUnits !== value &&
+            (value === HeatMapSpreadUnits.Viewport || value === HeatMapSpreadUnits.Document)) {
+            this._spreadUnits = value;
+            this.updateHeatMap();
+        }
+    }
+    /**
+     * Gets or sets the size of the chamfer neighborhood used when the {@link metric} is
+     * {@link HeatMapMetric.Euclidean}.
+     * A value of 3 sweeps a 3x3 neighborhood, approximating Euclidean distance to within
+     * about 8%, so large halos look subtly octagonal.
+     * A value of 5 also sweeps the knight's-move neighbors of a 5x5 neighborhood,
+     * approximating Euclidean distance to within about 2%, so halos look round,
+     * at roughly double the rendering cost.
+     * This has no effect when the metric is {@link HeatMapMetric.Manhattan},
+     * which is computed exactly.
+     *
+     * The default value is 3.
+     */
+    get chamferSize() {
+        return this._chamferSize;
+    }
+    set chamferSize(value) {
+        if (this.chamferSize !== value && (value === 3 || value === 5)) {
+            this._chamferSize = value;
+            this.updateHeatMap();
+        }
+    }
+    /**
+     * Gets or sets whether the heat map image is drawn in front of all Parts,
+     * in the "ViewportForeground" Layer, or behind them, in the "ViewportBackground" Layer.
+     *
+     * The default value is true.
+     */
+    get isInForeground() {
+        return this.heatMapPart.layerName === 'ViewportForeground';
+    }
+    set isInForeground(value) {
+        if (this.isInForeground !== value) {
+            // remove and re-add the part around the layer change: assigning layerName alone
+            // does not get the part into the new viewport-aligned layer's in-view parts list,
+            // so it would not be drawn until the next viewport change
+            const diag = this.diagram;
+            if (diag !== null)
+                diag.remove(this.heatMapPart);
+            this.heatMapPart.layerName = value ? 'ViewportForeground' : 'ViewportBackground';
+            if (diag !== null) {
+                diag.add(this.heatMapPart);
+                this.updateHeatMap();
+            }
+        }
     }
     /**
      * Override this method to customize getting the value for how "hot" the given Part is.
@@ -209,63 +333,252 @@ export class HeatMap {
         const canvas = picture.element;
         canvas.width = w;
         canvas.height = h;
-        this._renderHeatMap(canvas, vb, w, h, diag.scale);
+        this._renderHeatMap(canvas, vb, w, h, diag.scale, true);
         picture.redraw();
     }
-    // internal method that actually does the heat map computation and rendering
-    _renderHeatMap(canvas, vb, w, h, sc) {
+    // internal method that actually does the heat map computation and rendering;
+    // pass reuse only for the repeated viewport updates, never for renderImageData,
+    // whose returned ImageData callers may keep
+    _renderHeatMap(canvas, vvb, vw, vh, sc, reuse = false) {
         const diag = this.diagram;
         if (!diag)
             return null;
-        if (!vb.isReal())
+        if (!vvb.isReal())
             return null;
         const ctx = canvas.getContext('2d');
-        let imgdata = ctx.createImageData(w, h);
-        const d = imgdata.data;
         const len1 = this.colors.length - 1;
-        let minColorIndex = Infinity;
+        // how many gradient steps of heat each canvas pixel travelled consumes
+        const step = this._spreadUnits === HeatMapSpreadUnits.Document ? 1 / sc : 1;
+        // Parts beyond the visible area can still push heat into it so the field extends past the canvas by the maximum reach of the gradient
+        // vb its document bounds while vw and vh are the visible output size
+        const margin = Math.min(1024, Math.ceil(len1 / step));
+        const w = vw + 2 * margin;
+        const h = vh + 2 * margin;
+        const mdoc = margin / sc;
+        const vb = new go.Rect(vvb.x - mdoc, vvb.y - mdoc, vvb.width + 2 * mdoc, vvb.height + 2 * mdoc);
+        const INF = 1e9;
+        // reuse the cached buffers when their size still matches, to avoid
+        // allocating several megabytes on every update
+        let field = this._field;
+        if (field === null || field.length !== w * h) {
+            field = new Float32Array(w * h);
+            this._field = field;
+        }
+        field.fill(INF);
+        let imgdata;
+        if (reuse &&
+            this._imgdata !== null &&
+            this._imgdata.width === vw &&
+            this._imgdata.height === vh) {
+            imgdata = this._imgdata;
+            imgdata.data.fill(0);
+        }
+        else {
+            imgdata = ctx.createImageData(vw, vh);
+            if (reuse)
+                this._imgdata = imgdata;
+        }
+        let seeded = false;
+        // heat cannot spread beyond the seeded extent plus its maximum reach, so the
+        // sweeps and colorize only need to process that window of the canvas
+        const ext = { x0: w, y0: h, x1: -1, y1: -1, minC: len1 };
         const parts = diag.findPartsIn(vb, true, false);
         parts.each((part) => {
-            if (part instanceof go.Link)
-                return;
-            minColorIndex = Math.min(minColorIndex, this._renderPart(part, vb, w, h, sc, d));
-        });
-        parts.each((part) => {
-            if (!(part instanceof go.Link))
-                return;
-            minColorIndex = Math.min(minColorIndex, this._renderLink(part, vb, w, h, sc, d));
-        });
-        if (minColorIndex >= len1)
-            return imgdata;
-        let copydata = null;
-        for (let i = minColorIndex; i < len1; i++) {
-            const a = this.colors[i];
-            const b = this.colors[i + 1];
-            if (copydata === null) {
-                copydata = ctx.createImageData(w, h);
-                copydata.data.set(imgdata.data);
+            if (part instanceof go.Link) {
+                if (this._seedLink(part, vb, w, h, sc, field, ext))
+                    seeded = true;
             }
-            this._stepHeatMap(w, h, imgdata, a[0], a[1], a[2], a[3], copydata, b[0], b[1], b[2], b[3]);
-            const temp = imgdata;
-            imgdata = copydata;
-            copydata = temp;
-            copydata.data.set(imgdata.data);
+            else {
+                if (this._seedPart(part, vb, w, h, sc, field, ext))
+                    seeded = true;
+            }
+        });
+        // the window of the field that heat can actually occupy,
+        // and its intersection with the visible output
+        let rx0 = 0;
+        let ry0 = 0;
+        let rx1 = -1;
+        let ry1 = -1;
+        let ox0 = 0;
+        let oy0 = 0;
+        let ox1 = -1;
+        let oy1 = -1;
+        if (seeded) {
+            // heat spreads at most this many pixels beyond the seeded extent
+            const reach = Math.ceil((len1 - ext.minC) / step);
+            rx0 = Math.max(0, ext.x0 - reach);
+            ry0 = Math.max(0, ext.y0 - reach);
+            rx1 = Math.min(w - 1, ext.x1 + reach);
+            ry1 = Math.min(h - 1, ext.y1 + reach);
+            if (this._metric === HeatMapMetric.Euclidean) {
+                // 8-neighbor sweeps whose diagonal moves cost sqrt(2) approximate
+                // Euclidean distance, producing approximately circular halos;
+                // a chamferSize of 5 also sweeps the knight's-move neighbors at cost sqrt(5),
+                // tightening the approximation so large halos look round instead of octagonal
+                const diag = step * Math.SQRT2;
+                const use5 = this._chamferSize === 5;
+                const knight = step * Math.sqrt(5);
+                // forward sweep: propagate from the left, top, and both upper diagonals
+                for (let j = ry0; j <= ry1; j++) {
+                    const row = j * w;
+                    for (let i = rx0; i <= rx1; i++) {
+                        const k = row + i;
+                        let v = field[k];
+                        if (i > 0 && field[k - 1] + step < v)
+                            v = field[k - 1] + step;
+                        if (j > 0) {
+                            if (field[k - w] + step < v)
+                                v = field[k - w] + step;
+                            if (i > 0 && field[k - w - 1] + diag < v)
+                                v = field[k - w - 1] + diag;
+                            if (i < w - 1 && field[k - w + 1] + diag < v)
+                                v = field[k - w + 1] + diag;
+                        }
+                        if (use5) {
+                            if (j > 0) {
+                                if (i > 1 && field[k - w - 2] + knight < v)
+                                    v = field[k - w - 2] + knight;
+                                if (i < w - 2 && field[k - w + 2] + knight < v)
+                                    v = field[k - w + 2] + knight;
+                            }
+                            if (j > 1) {
+                                if (i > 0 && field[k - 2 * w - 1] + knight < v)
+                                    v = field[k - 2 * w - 1] + knight;
+                                if (i < w - 1 && field[k - 2 * w + 1] + knight < v)
+                                    v = field[k - 2 * w + 1] + knight;
+                            }
+                        }
+                        field[k] = v;
+                    }
+                }
+                // backward sweep: propagate from the right, bottom, and both lower diagonals
+                for (let j = ry1; j >= ry0; j--) {
+                    const row = j * w;
+                    for (let i = rx1; i >= rx0; i--) {
+                        const k = row + i;
+                        let v = field[k];
+                        if (i < w - 1 && field[k + 1] + step < v)
+                            v = field[k + 1] + step;
+                        if (j < h - 1) {
+                            if (field[k + w] + step < v)
+                                v = field[k + w] + step;
+                            if (i < w - 1 && field[k + w + 1] + diag < v)
+                                v = field[k + w + 1] + diag;
+                            if (i > 0 && field[k + w - 1] + diag < v)
+                                v = field[k + w - 1] + diag;
+                        }
+                        if (use5) {
+                            if (j < h - 1) {
+                                if (i < w - 2 && field[k + w + 2] + knight < v)
+                                    v = field[k + w + 2] + knight;
+                                if (i > 1 && field[k + w - 2] + knight < v)
+                                    v = field[k + w - 2] + knight;
+                            }
+                            if (j < h - 2) {
+                                if (i < w - 1 && field[k + 2 * w + 1] + knight < v)
+                                    v = field[k + 2 * w + 1] + knight;
+                                if (i > 0 && field[k + 2 * w - 1] + knight < v)
+                                    v = field[k + 2 * w - 1] + knight;
+                            }
+                        }
+                        field[k] = v;
+                    }
+                }
+            }
+            else {
+                // 4-neighbor sweeps compute exact city-block distance, producing diamond halos
+                // forward sweep: propagate from the left and top
+                for (let j = ry0; j <= ry1; j++) {
+                    const row = j * w;
+                    for (let i = rx0; i <= rx1; i++) {
+                        const k = row + i;
+                        let v = field[k];
+                        if (i > 0 && field[k - 1] + step < v)
+                            v = field[k - 1] + step;
+                        if (j > 0 && field[k - w] + step < v)
+                            v = field[k - w] + step;
+                        field[k] = v;
+                    }
+                }
+                // backward sweep: propagate from the right and bottom
+                for (let j = ry1; j >= ry0; j--) {
+                    const row = j * w;
+                    for (let i = rx1; i >= rx0; i--) {
+                        const k = row + i;
+                        let v = field[k];
+                        if (i < w - 1 && field[k + 1] + step < v)
+                            v = field[k + 1] + step;
+                        if (j < h - 1 && field[k + w] + step < v)
+                            v = field[k + w] + step;
+                        field[k] = v;
+                    }
+                }
+            }
+            // map the visible portion of the field into the gradient and shift field coordinates back by the margin to output coordinates
+            const d = imgdata.data;
+            const colors = this.colors;
+            const jlo = Math.max(ry0, margin);
+            const jhi = Math.min(ry1, margin + vh - 1);
+            const ilo = Math.max(rx0, margin);
+            const ihi = Math.min(rx1, margin + vw - 1);
+            for (let j = jlo; j <= jhi; j++) {
+                const row = j * w;
+                const orow = (j - margin) * vw;
+                for (let i = ilo; i <= ihi; i++) {
+                    const v = field[row + i];
+                    if (v <= len1) {
+                        // v <= len1 guarantees the rounded index stays within the colors Array
+                        const c = colors[Math.round(v)];
+                        const k4 = 4 * (orow + (i - margin));
+                        d[k4] = c[0];
+                        d[k4 + 1] = c[1];
+                        d[k4 + 2] = c[2];
+                        d[k4 + 3] = c[3];
+                    }
+                }
+            }
+            if (jhi >= jlo && ihi >= ilo) {
+                ox0 = ilo - margin;
+                oy0 = jlo - margin;
+                ox1 = ihi - margin;
+                oy1 = jhi - margin;
+            }
         }
-        ctx.clearRect(0, 0, w, h);
-        ctx.putImageData(imgdata, 0, 0);
+        ctx.clearRect(0, 0, vw, vh);
+        // only upload the window that heat occupies
+        if (ox1 >= ox0 && oy1 >= oy0) {
+            ctx.putImageData(imgdata, 0, 0, ox0, oy0, ox1 - ox0 + 1, oy1 - oy0 + 1);
+        }
         return imgdata;
     }
-    _renderLink(part, vb, w, h, sc, d) {
+    // widen the pending seeded extent by this part's canvas-pixel bounds and starting index
+    _extendExtent(ext, b, vb, sc, startC) {
+        const x0 = Math.round((b.x - vb.x) * sc);
+        const y0 = Math.round((b.y - vb.y) * sc);
+        const x1 = Math.round((b.right - vb.x) * sc);
+        const y1 = Math.round((b.bottom - vb.y) * sc);
+        if (x0 < ext.x0)
+            ext.x0 = x0;
+        if (y0 < ext.y0)
+            ext.y0 = y0;
+        if (x1 > ext.x1)
+            ext.x1 = x1;
+        if (y1 > ext.y1)
+            ext.y1 = y1;
+        if (startC < ext.minC)
+            ext.minC = startC;
+    }
+    _seedLink(part, vb, w, h, sc, field, ext) {
         const frac = this.normalizeTemperature(this.getTemperature(part));
         if (frac <= 0)
-            return Infinity;
+            return false;
         const startC = this.computeStartingColorIndex(frac);
-        const SC = this.colors[startC];
         if (part.pointsCount < 2)
-            return Infinity;
+            return false;
         const b = part.routeBounds.copy();
         if (!b.intersectsRect(vb))
-            return Infinity;
+            return false;
+        this._extendExtent(ext, b, vb, sc, startC);
         if (part.computeCurve() === go.Curve.Bezier) {
             for (let i = 0; i < part.pointsCount - 1; i += 3) {
                 let p = part.getPoint(i);
@@ -302,13 +615,9 @@ export class HeatMap {
                     const py = Math.round(c0 * p0y + c1 * p1y + c2 * p2y + c3 * p3y);
                     if (py < 0 || py >= h)
                         continue;
-                    const k = 4 * (py * w + px);
-                    if (k >= 0 && k < d.length && d[k + 3] === 0) {
-                        d[k] = SC[0];
-                        d[k + 1] = SC[1];
-                        d[k + 2] = SC[2];
-                        d[k + 3] = SC[3];
-                    }
+                    const k = py * w + px;
+                    if (startC < field[k])
+                        field[k] = startC;
                 }
             }
         }
@@ -335,35 +644,31 @@ export class HeatMap {
                     const y2 = Math.round(vp.y + z * dy);
                     if (y2 < 0 || y2 >= h)
                         continue;
-                    const k2 = 4 * (y2 * w + x2);
-                    if (k2 >= 0 && k2 < d.length && d[k2 + 3] === 0) {
-                        d[k2] = SC[0];
-                        d[k2 + 1] = SC[1];
-                        d[k2 + 2] = SC[2];
-                        d[k2 + 3] = SC[3];
-                    }
+                    const k2 = y2 * w + x2;
+                    if (startC < field[k2])
+                        field[k2] = startC;
                 }
                 vp = vq;
             }
         }
-        return startC;
+        return true;
     }
-    _renderPart(part, vb, w, h, sc, d) {
+    _seedPart(part, vb, w, h, sc, field, ext) {
         const frac = this.normalizeTemperature(this.getTemperature(part));
         if (frac <= 0)
-            return Infinity;
+            return false;
         const startC = this.computeStartingColorIndex(frac);
-        const SC = this.colors[startC];
         let obj = part.selectionObject;
         if (obj instanceof go.Panel &&
             (obj.type === go.Panel.Auto || obj.type === go.Panel.Spot)) {
             obj = obj.findMainElement();
         }
         if (!obj)
-            return Infinity;
+            return false;
         const b = obj.getDocumentBounds().copy();
         if (!b.intersectsRect(vb))
-            return Infinity;
+            return false;
+        this._extendExtent(ext, b, vb, sc, startC);
         if (obj instanceof go.Shape &&
             (obj.figure === 'Ellipse' || obj.figure === 'Circle') &&
             obj.getDocumentAngle() === 0) {
@@ -382,14 +687,10 @@ export class HeatMap {
             let x0 = rx;
             let dx = 0;
             for (let x = -rx; x <= rx; x++) {
-                if (oy >= 0 && oy < h && ox + x >= 0 && ox + x < h) {
-                    const k = 4 * (oy * w + (ox + x));
-                    if (k >= 0 && k < d.length && d[k + 3] === 0) {
-                        d[k] = SC[0];
-                        d[k + 1] = SC[1];
-                        d[k + 2] = SC[2];
-                        d[k + 3] = SC[3];
-                    }
+                if (oy >= 0 && oy < h && ox + x >= 0 && ox + x < w) {
+                    const k = oy * w + (ox + x);
+                    if (startC < field[k])
+                        field[k] = startC;
                 }
             }
             for (let y = 1; y <= ry; y++) {
@@ -402,22 +703,14 @@ export class HeatMap {
                 x0 = x1;
                 for (let x = -x0; x <= x0; x++) {
                     if (oy - y >= 0 && oy - y < h && ox + x >= 0 && ox + x < w) {
-                        const km = 4 * ((oy - y) * w + (ox + x));
-                        if (km >= 0 && km < d.length && d[km + 3] === 0) {
-                            d[km] = SC[0];
-                            d[km + 1] = SC[1];
-                            d[km + 2] = SC[2];
-                            d[km + 3] = SC[3];
-                        }
+                        const km = (oy - y) * w + (ox + x);
+                        if (startC < field[km])
+                            field[km] = startC;
                     }
                     if (oy + y >= 0 && oy + y < h && ox + x >= 0 && ox + x < w) {
-                        const kp = 4 * ((oy + y) * w + (ox + x));
-                        if (kp >= 0 && kp < d.length && d[kp + 3] === 0) {
-                            d[kp] = SC[0];
-                            d[kp + 1] = SC[1];
-                            d[kp + 2] = SC[2];
-                            d[kp + 3] = SC[3];
-                        }
+                        const kp = (oy + y) * w + (ox + x);
+                        if (startC < field[kp])
+                            field[kp] = startC;
                     }
                 }
             }
@@ -436,66 +729,12 @@ export class HeatMap {
                 for (let i = tl.x; i <= br.x; i++) {
                     if (i < 0 || i >= w)
                         continue;
-                    const k = 4 * (j * w + i);
-                    if (k >= 0 && k < d.length && d[k + 3] === 0) {
-                        d[k] = SC[0];
-                        d[k + 1] = SC[1];
-                        d[k + 2] = SC[2];
-                        d[k + 3] = SC[3];
-                    }
+                    const k = j * w + i;
+                    if (startC < field[k])
+                        field[k] = startC;
                 }
             }
         }
-        return startC;
-    }
-    // if an empty cell is next to a pRGBA cell, set it to nRGBA
-    _stepHeatMap(w, h, imgdata, pr, pg, pb, pa, copydata, nr, ng, nb, na) {
-        const d = imgdata.data;
-        const c = copydata.data;
-        // don't bother handling edge pixels
-        for (let j = 1; j < h - 1; j++) {
-            for (let i = 1; i < w - 1; i++) {
-                const k = 4 * (j * w + i);
-                if (d[k + 3] !== 0)
-                    continue; // assume already set
-                const w4 = 4 * w;
-                if (d[k - w4] === pr &&
-                    d[k - w4 + 1] === pg &&
-                    d[k - w4 + 2] === pb &&
-                    d[k - w4 + 3] === pa) {
-                    c[k] = nr;
-                    c[k + 1] = ng;
-                    c[k + 2] = nb;
-                    c[k + 3] = na;
-                }
-                else if (d[k + w4] === pr &&
-                    d[k + w4 + 1] === pg &&
-                    d[k + w4 + 2] === pb &&
-                    d[k + w4 + 3] === pa) {
-                    c[k] = nr;
-                    c[k + 1] = ng;
-                    c[k + 2] = nb;
-                    c[k + 3] = na;
-                }
-                else if (d[k - 4] === pr &&
-                    d[k - 4 + 1] === pg &&
-                    d[k - 4 + 2] === pb &&
-                    d[k - 4 + 3] === pa) {
-                    c[k] = nr;
-                    c[k + 1] = ng;
-                    c[k + 2] = nb;
-                    c[k + 3] = na;
-                }
-                else if (d[k + 4] === pr &&
-                    d[k + 4 + 1] === pg &&
-                    d[k + 4 + 2] === pb &&
-                    d[k + 4 + 3] === pa) {
-                    c[k] = nr;
-                    c[k + 1] = ng;
-                    c[k + 2] = nb;
-                    c[k + 3] = na;
-                }
-            }
-        }
+        return true;
     }
 }

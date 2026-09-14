@@ -63,6 +63,21 @@ A script-tag load is also supported (`go` becomes a global):
 
 - [changelog](https://gojs.net/latest/changelog) — what changed in each release.
 
+## License
+
+- GoJS is commercial software, not open-source. It is free for individuals for
+  non-commercial use, such as learning and hobby projects, under the
+  [Non-Commercial Software License Agreement](https://gojs.net/latest/nonCommercialLicense).
+  No license key is issued or required, so the watermark remains in the diagram.
+  You can opt to set `go.Diagram.licenseKey = "non-commercial"` (or `"academic"` for
+  non-commercial academic work) before creating the first Diagram.
+- Use of GoJS by or on behalf of an organization, including any company, non-profit,
+  educational institution, or government agency, is commercial use. Commercial use
+  requires a [purchased license](https://gojs.net/latest/pricing) under the
+  [software license](https://gojs.net/latest/license), or private evaluation under the
+  [Evaluation License Agreement](https://gojs.net/latest/evaluationLicense).
+  See [Deployment](https://gojs.net/latest/learn/deployment) for license keys.
+
 ## Key concepts (one-line summaries)
 
 - **Diagram** — the top-level container, attached to a host `<div>`.

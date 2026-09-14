@@ -23,7 +23,9 @@ import go from 'gojs';
  * ```
  *   myDiagram.routers.add(new LinkLabelRouter({
  *      layoutProps: {
- *        defaultElectricalCharge: 100,
+ *          // these are the LinkLabelRouter's defaults
+ *          defaultElectricalCharge: 25,
+ *          defaultSpringStiffness: 0.25
  *        ...
  *      }
  *   }));
@@ -169,6 +171,9 @@ class LabelLayout extends go.ForceDirectedLayout {
         super();
         /** @hidden */ this.router = null;
         /** @hidden */ this.activeSet = null;
+        // attempt to avoid overlaps without straying too far from the links
+        this.defaultElectricalCharge = 25;
+        this.defaultSpringStiffness = 0.25;
         if (init)
             Object.assign(this, init);
     }

@@ -1,5 +1,5 @@
 /*
- * Type definitions for GoJS v4.0.3
+ * Type definitions for GoJS v4.0.4
  * Project: https://gojs.net
  * Definitions by: Northwoods Software <https://github.com/NorthwoodsSoftware>
  * Definitions: https://github.com/NorthwoodsSoftware/GoJS
@@ -3089,7 +3089,7 @@ export declare enum GeometryStretch {
  *         .add(new go.PathSegment(go.SegmentType.Line, q.x, q.y))
  *         .add(new go.PathSegment(go.SegmentType.Arc, sweep/2, -sweep, 0, 0, radius, radius).close()));
  * ```
- * See samples that make use of Geometries in the <a href="../../samples/index.html#geometries">samples index</a>.
+ * See samples that make use of Geometries in the <a href="../../samples#geometries">samples index</a>.
  * @category Geometry
  */
 export class Geometry {
@@ -3781,7 +3781,7 @@ export class PathSegment {
  * By default a user-created InputEvent sets {@link button} and {@link buttons} as if the event was a left-click.
  *
  * You can create InputEvents and set the value of {@link Diagram.lastInput} in order to simulate user actions in tools.
- * This can be useful for testing. See the <a href="../../samples/Robot.html">Simulated inputs sample</a> for
+ * This can be useful for testing. See the <a href="../../samples/Robot">Simulated inputs sample</a> for
  * an example of creating InputEvents to simulate user input.
  */
 export class InputEvent {
@@ -5140,7 +5140,7 @@ export class UndoManager {
  * via canonicalized {@link InputEvent}s.
  * <p class="boxrun">
  * For more discussion, see <a href="../../learn/tools">Learn page on Tools</a>.
- * See samples that make use of tools in the <a href="../../samples/index.html#tools">samples index</a>.
+ * See samples that make use of tools in the <a href="../../samples#tools">samples index</a>.
  *
  * Most tools are "mode-less" tools that are managed by the {@link ToolManager},
  * which chooses the current tool based on the kind and position of the mouse event and the parts in the diagram.
@@ -8553,7 +8553,7 @@ export class PanningTool extends Tool {
      *
      * Override this method to customize behavior as the user pans or pinches,
      * perhaps modifying a selected object instead of Diagram properties.
-     * See the <a href="../../samples/pinchResizing.html">Pinch Rescaling Tool</a> sample for such an example.
+     * See the <a href="../../samples/pinchResizing">Pinch Rescaling Tool</a> sample for such an example.
      *
      * This method does not normally perform a transaction, so if you want to modify some GraphObjects,
      * you will need to conduct a transaction by calling {@link Tool.startTransaction} in an override of
@@ -8686,7 +8686,7 @@ export class PanningTool extends Tool {
  * This tool does not utilize any {@link Adornment}s or tool handles.
  * This tool does not modify the model or conduct any transaction.
  *
- * An example customization of this tool is shown in the <a href="../../samples/TreeMap.html">Tree Map</a> sample,
+ * An example customization of this tool is shown in the <a href="../../samples/TreeMap">Tree Map</a> sample,
  * where the {@link Tool.standardMouseSelect} method is overridden to permit the user to cycle through
  * the chain of containing groups, changing the selection on each click to the next containing group.
  *
@@ -8884,9 +8884,9 @@ export class ClickCreatingTool extends Tool {
  * If you implement your own drag-in-the-background-to-do-something tool, you may need to disable
  * this tool or insert your new tool in the {@link ToolManager.mouseMoveTools} list before this tool,
  * in order for your tool to run.  There are examples of such tools defined in the extensions directory:
- * <a href="../../samples/RealtimeDragSelecting.html">Realtime Drag Selecting Tool</a>,
- * <a href="../../samples/DragCreating.html">Drag Creating Tool</a>, and
- * <a href="../../samples/DragZooming.html">Drag Zooming Tool</a>.
+ * <a href="../../samples/RealtimeDragSelecting">Realtime Drag Selecting Tool</a>,
+ * <a href="../../samples/DragCreating">Drag Creating Tool</a>, and
+ * <a href="../../samples/DragZooming">Drag Zooming Tool</a>.
  *
  * If you want to programmatically select some Parts in a rectangular area,
  * you can call {@link selectInRect}.
@@ -9045,10 +9045,10 @@ export class DragSelectingTool extends Tool {
  * typically by calling `diagram.currentTool.stopTool();`.
  *
  * Example usage of HTMLInfo can be found in the
- * <a href="../../samples/customContextMenu.html">Custom Context Menu</a> and
- * <a href="../../samples/htmlLightBoxContextMenu.html">HTML LightBox Context Menu</a> samples, the
- * <a href="../../samples/customTextEditingTool.html">Custom TextEditingTool sample</a>, and the
- * <a href="../../samples/TextEditor.html">Text Editor implementation extension</a>.
+ * <a href="../../samples/customContextMenu">Custom Context Menu</a> and
+ * <a href="../../samples/htmlLightBoxContextMenu">HTML LightBox Context Menu</a> samples, the
+ * <a href="../../samples/customTextEditingTool">Custom TextEditingTool sample</a>, and the
+ * <a href="../../samples/TextEditor">Text Editor implementation extension</a>.
  *
  * Here is the outline for typical usage of HTMLInfo as a context menu:
  * ```js
@@ -9079,7 +9079,7 @@ export class DragSelectingTool extends Tool {
  * ```
  *
  * By default, {@link TextEditingTool.defaultTextEditor} is an instance of HTMLInfo.
- * You can see its default implementation details <a href="../../samples/TextEditor.html">here</a>.
+ * You can see its default implementation details <a href="../../samples/TextEditor">here</a>.
  * @category Tool
  */
 export class HTMLInfo {
@@ -9160,8 +9160,8 @@ export class HTMLInfo {
  * although any code invoked by context menu commands might do so.
  *
  * There are examples of customizing this tool in the
- * <a href="../../samples/customContextMenu.html">Custom Context Menu</a> and
- * <a href="../../samples/htmlLightBoxContextMenu.html">HTML LightBox Context Menu</a> samples.
+ * <a href="../../samples/customContextMenu">Custom Context Menu</a> and
+ * <a href="../../samples/htmlLightBoxContextMenu">HTML LightBox Context Menu</a> samples.
  *
  * If you want to programmatically show a context menu for a particular GraphObject or for the
  * whole diagram, call {@link CommandHandler.showContextMenu}.
@@ -9550,7 +9550,7 @@ export class TextEditingTool extends Tool {
      * and {@link HTMLInfo.hide} during {@link doDeactivate}.
      *
      * By default the value is an {@link HTMLInfo}, and the {@link HTMLInfo.mainElement} is an `HTMLTextArea`.
-     * You can see the default implementation details <a href="../../samples/TextEditor.html">here</a>.
+     * You can see the default implementation details <a href="../../samples/TextEditor">here</a>.
      *
      * For typical operation, HTMLInfo implementations should have a way of calling {@link TextEditingTool.acceptText}.
      */
@@ -9999,7 +9999,7 @@ export class AnimationManager {
  * animation.start();
  * ```
  *
- * See the <a href="../../learn/animation">Learn page on Animations</a> and the <a href="../../samples/customAnimations.html">Custom Animations sample</a>
+ * See the <a href="../../learn/animation">Learn page on Animations</a> and the <a href="../../samples/customAnimations">Custom Animations sample</a>
  * for more example usage of the Animation class.
  *
  * Unlike the {@link AnimationManager.defaultAnimation}, Animations can be started any time,
@@ -11014,7 +11014,7 @@ export declare enum CollapsePolicy {
  * data objects for the nodes and the links.
  * The model provides the way to recognize the relationships between the data.
  * <p class="boxrun">
- * Two Diagrams can display and manipulate the same Model. (<a href="../../samples/updateDemo.html">Example</a>)
+ * Two Diagrams can display and manipulate the same Model. (<a href="../../samples/updateDemo">Example</a>)
  *
  * A diagram will automatically create {@link Node}s and {@link Link}s corresponding to the model data.
  * The diagram has a number of named templates it uses to create the actual parts:
@@ -11053,7 +11053,7 @@ export declare enum CollapsePolicy {
  * ]);
  * ```
  * <p class="boxrun">
- * The above code is used to make the <a href="../../samples/minimal.html">Minimal sample</a>, a simple example of
+ * The above code is used to make the <a href="../../samples/minimal">Minimal sample</a>, a simple example of
  * creating a Diagram and setting its model.
  * <p class="boxread">
  * Read about models on the <a href="../../learn/usingModels">Using Models</a> page in Learn.
@@ -14017,7 +14017,7 @@ export class Diagram {
      * By default this method returns a snapshot of the visible diagram, but optional arguments give more options.
      * <p class="boxread">
      * See the page on <a href="../../learn/makingSVG">Making SVG</a> for usage examples.
-     * See the <a href="../../samples/minimalSvg.html">Minimal SVG Download sample</a>,
+     * See the <a href="../../samples/minimalSvg">Minimal SVG Download sample</a>,
      * which also demonstrates downloading an SVG file without involving a web server.
      *
      * Note that the resulting SVG DOM is not interactive -- it is a snapshot of this diagram at this time.
@@ -14277,7 +14277,7 @@ export interface DiagramRendererOptions {
      * If provided, call the callback when finished instead of returning immediately. This can be useful if you need to wait for image assets to load.
      * This also respects the {@link callbackTimeout}.
      * This argument is necessary if the {@link ImageRendererOptions.returnType} is `"blob"`, however a callback can be used with any {@link ImageRendererOptions.returnType}.
-     * See the <a href="../../samples/minimalBlob.html">Minimal Image Blob Download sample</a> for an example usage,
+     * See the <a href="../../samples/minimalBlob">Minimal Image Blob Download sample</a> for an example usage,
      * which also demonstrates downloading an image file without involving a web server.
      */
     callback?: ((result: any) => void) | null;
@@ -14346,7 +14346,7 @@ export interface ImageRendererOptions extends DiagramRendererOptions {
  * The Palette is {@link Diagram.isReadOnly} but to support drag-and-drop its {@link Diagram.allowDragOut} is true.
  * <p class="box">
  * For more discussion, see <a href="../../learn/palette">Learn page on Palettes</a>.
- * See samples that make use of Palettes in the <a href="../../samples/index.html#palette">samples index</a>.
+ * See samples that make use of Palettes in the <a href="../../samples#palette">samples index</a>.
  *
  * You can control the order of Parts in the palette in several manners:
  *   - If you want to keep the order given by `myPalette.model.nodeDataArray`,
@@ -14388,7 +14388,7 @@ export class Palette extends Diagram {
  * with a rectangular box showing the viewport displayed by that other diagram.
  * <p class="box">
  * For more discussion, see <a href="../../learn/overview">Learn page on Overviews</a>.
- * See samples that make use of Overviews in the <a href="../../samples/index.html#overview">samples index</a>.
+ * See samples that make use of Overviews in the <a href="../../samples#overview">samples index</a>.
  * </p>
  * All you need to do is set {@link Overview.observed}.
  * For example:
@@ -15961,7 +15961,7 @@ export type MakeAllow<CT extends ConstructorType<CT>, C, E> = (InstanceType<CT> 
  * It is very common to make use of the static function {@link GraphObject.make} in order to build up
  * a visual tree of GraphObjects.  You can see many examples of this throughout the
  * Learn pages, starting at <a href="../../learn/buildingObjects">Building Objects</a>,
- * and the Samples, starting with <a href="../../samples/minimal.html">Minimal Sample</a>.
+ * and the Samples, starting with <a href="../../samples/minimal">Minimal Sample</a>.
  *
  * Since GraphObject is an abstract class, programmers do not create GraphObjects themselves,
  * but this class defines many properties used by all kinds of GraphObjects.
@@ -16035,7 +16035,7 @@ export type MakeAllow<CT extends ConstructorType<CT>, C, E> = (InstanceType<CT> 
  *   - {@link diagram} returns the {@link Diagram} that this GraphObject's Part's Layer is in
  *
  * <p class="boxrun">
- * See <a href="../../samples/visualTree.html">the Visual Tree sample</a>
+ * See <a href="../../samples/visualTree">the Visual Tree sample</a>
  * for a diagram displaying the visual tree of a simple diagram.
  * <h3>User Interaction</h3>
  *
@@ -16137,7 +16137,7 @@ export type MakeAllow<CT extends ConstructorType<CT>, C, E> = (InstanceType<CT> 
  * For more information, please read <a href="../../learn/contextMenus">the Learn page about Context Menus</a>
  * and <a href="../../learn/tooltips">the page about ToolTips</a>.
  * <p class="boxrun">
- * Also see <a href="../../samples/basic.html">the Basic sample</a>
+ * Also see <a href="../../samples/basic">the Basic sample</a>
  * for examples of how to show context menus and tooltips.
  */
 export abstract class GraphObject {
@@ -17309,7 +17309,7 @@ export abstract class GraphObject {
      * {@link Diagram.commitTransaction}.
      * <p class="boxrun">
      * An example of a click event handler is shown in the
-     * <a href="../../samples/arrowheads.html">Arrowheads sample</a>.
+     * <a href="../../samples/arrowheads">Arrowheads sample</a>.
      * @see {@link doubleClick}
      * @see {@link contextClick}
      * @see {@link Diagram.click}
@@ -17344,7 +17344,7 @@ export abstract class GraphObject {
      * you should do so within a transaction -- call {@link Diagram.startTransaction} and
      * {@link Diagram.commitTransaction}.
      *
-     * The <a href="../../samples/classHierarchy.html">Class Hierarchy sample</a>
+     * The <a href="../../samples/classHierarchy">Class Hierarchy sample</a>
      * demonstrates the definition of a double-click event handler that opens up
      * a web page with the documentation for that class:
      * ```js
@@ -17490,7 +17490,7 @@ export abstract class GraphObject {
      * You do not need to start and commit any transaction in this function.
      * After calling this function the diagram will be updated immediately.
      *
-     * For example, the <a href="../../samples/flowchart.html">Flow Chart sample</a>
+     * For example, the <a href="../../samples/flowchart">Flow Chart sample</a>
      * automatically shows and hides the ports as the mouse passes over a node.
      * The node template includes the following settings:
      * ```js
@@ -17620,7 +17620,7 @@ export abstract class GraphObject {
      * After calling this function the diagram will be updated immediately.
      *
      * For an example of a mouseDragEnter event handler, see the node template in the
-     * <a href="../../samples/orgChartEditor.html">Org Chart Editor sample</a>.
+     * <a href="../../samples/orgChartEditor">Org Chart Editor sample</a>.
      * @see {@link mouseDragLeave}
      * @see {@link mouseHold}
      * @see {@link mouseDrop}
@@ -17652,7 +17652,7 @@ export abstract class GraphObject {
      * After calling this function the diagram will be updated immediately.
      *
      * For an example of a mouseDragLeave event handler, see the node template in the
-     * <a href="../../samples/orgChartEditor.html">Org Chart Editor sample</a>.
+     * <a href="../../samples/orgChartEditor">Org Chart Editor sample</a>.
      * @see {@link mouseDragEnter}
      * @see {@link mouseHold}
      * @see {@link mouseDrop}
@@ -17676,7 +17676,7 @@ export abstract class GraphObject {
      * By default this property is null.
      *
      * For an example of a mouseDrop event handler, see the node template in the
-     * <a href="../../samples/orgChartEditor.html">Org Chart Editor sample</a>.
+     * <a href="../../samples/orgChartEditor">Org Chart Editor sample</a>.
      * @see {@link mouseDragEnter}
      * @see {@link mouseDragLeave}
      * @see {@link mouseHold}
@@ -17760,7 +17760,7 @@ export abstract class GraphObject {
      * The default value is null, which means no tooltip is shown.
      *
      * A typical tooltip is defined in the following manner, as taken from
-     * the <a href="../../samples/kittenMonitor.html">Kitten Monitor sample</a>:
+     * the <a href="../../samples/kittenMonitor">Kitten Monitor sample</a>:
      * ```js
      * myDiagram.nodeTemplate =
      *   new go.Node(...,
@@ -17817,7 +17817,7 @@ export abstract class GraphObject {
      *
      * A typical context menu is implemented as an Adornment with several buttons in it.
      * For example, this context menu is defined in the
-     * <a href="../../samples/dynamicPorts.html">Dynamic Port sample</a>:
+     * <a href="../../samples/dynamicPorts">Dynamic Port sample</a>:
      * ```js
      * const nodeMenu =  // context menu for each Node
      *  go.GraphObject.build("ContextMenu").add(
@@ -17850,7 +17850,7 @@ export abstract class GraphObject {
      * However, if there is a {@link Placeholder} in the context menu, the context menu (i.e. an Adornment)
      * will be positioned so that the Placeholder is at the same position as this adorned GraphObject.
      *
-     * The <a href="../../samples/basic.html">Basic sample</a> also shows how
+     * The <a href="../../samples/basic">Basic sample</a> also shows how
      * to make context menu items invisible when the command is disabled.
      *
      * Replacing this value will not modify or remove any existing context menu that is being shown for this object.
@@ -18878,9 +18878,9 @@ export class Brush {
  *
  * An instance of a PanelLayout is shared by all copies of a Panel that uses it.
  *
- * There is an example PanelLayout in the <a href="../../samples/panelLayout.html">PanelLayout sample</a>.
+ * There is an example PanelLayout in the <a href="../../samples/panelLayout">PanelLayout sample</a>.
  * There is a Flow PanelLayout extension at {@link PanelLayoutFlow}, demonstrated at
- * <a href="../../extensionsJSM/PanelLayoutFlow.html">Flow PanelLayout sample</a>.
+ * <a href="../../samples/PanelLayoutFlow">Flow PanelLayout sample</a>.
  * @since 2.0
  */
 export abstract class PanelLayout {
@@ -19078,7 +19078,7 @@ export declare enum ViewboxStretch {
  * They are typically only used in item templates, e.g. for automatically creating rows in a Table Panel based on model data
  * provided in an {@link itemArray}. You will still need to specify properties on the individual elements within a TableRow
  * or TableColumn as if they were immediate elements of the containing Table panel.
- * <p class="boxrun">For an example that uses TableRow Panels, see <a href="../../samples/records.html">Records sample</a>.
+ * <p class="boxrun">For an example that uses TableRow Panels, see <a href="../../samples/records">Records sample</a>.
  *
  * {@link Panel.Grid} panels are often used for the Diagram's {@link Diagram.grid}.
  * ```js
@@ -19938,7 +19938,7 @@ export class Panel extends GraphObject {
     set alignmentFocusName(value: string);
     /**
      * Register a PanelLayout. This is called when making new Panel types.
-     * See the <a href="../../samples/panelLayout.html">PanelLayout sample</a> for an example.
+     * See the <a href="../../samples/panelLayout">PanelLayout sample</a> for an example.
      * PanelLayout names can be used as the first argument to a Panel constructor.
      *
      * You can determine whether or not a builder name has already been defnied by calling the static function {@link Panel.isLayoutDefined}.
@@ -20550,11 +20550,11 @@ export class RowColumnDefinition {
  * then {@link fromArrow}, then {@link figure}. If the value of {@link toArrow} or {@link fromArrow} is "None"
  * then it is ignored, and the "None" value of {@link figure} is identical to "Rectangle".
  *
- * All of the predefined figures are shown in the <a href="../../samples/shapes.html">Shapes sample</a>.
+ * All of the predefined figures are shown in the <a href="../../samples/shapes">Shapes sample</a>.
  * You can define your own named figures by calling the static function {@link Shape.defineFigureGenerator}.
  * Get a {@link Map | go.Map} of named figures by calling the static function {@link Shape.getFigureGenerators}.
  *
- * All of the predefined arrowheads are shown in the <a href="../../samples/arrowheads.html">Arrowheads sample</a>.
+ * All of the predefined arrowheads are shown in the <a href="../../samples/arrowheads">Arrowheads sample</a>.
  * You can define your own named arrowheads by calling the static function {@link Shape.defineArrowheadGeometry}.
  * Get a {@link Map | go.Map} of named arrowheads by calling the static function {@link Shape.getArrowheadGeometries}.
  *
@@ -20764,7 +20764,7 @@ export class Shape extends GraphObject {
      *
      * The name can be any case but will always be canonicalized when set. For instance,
      * setting "roundedrectangle" will set the value of figure to "RoundedRectangle".
-     * All of the predefined figures are shown in the <a href="../../samples/shapes.html">Shapes sample</a>.
+     * All of the predefined figures are shown in the <a href="../../samples/shapes">Shapes sample</a>.
      *
      * At most one of the following three properties may be set to a non-"None" value at the same time on the same shape:
      * {@link figure}, {@link toArrow}, {@link fromArrow}.
@@ -20787,7 +20787,7 @@ export class Shape extends GraphObject {
      *
      * The name can be any case but will always be canonicalized when set. For instance,
      * setting "opentriangle" will set the value of the arrowhead to "OpenTriangle".
-     * All of the predefined arrowheads are shown in the <a href="../../samples/arrowheads.html">Arrowheads sample</a>.
+     * All of the predefined arrowheads are shown in the <a href="../../samples/arrowheads">Arrowheads sample</a>.
      *
      * Setting this property may also set the {@link GraphObject.segmentIndex},
      * {@link GraphObject.segmentOrientation}, and {@link GraphObject.alignmentFocus} properties.
@@ -20817,7 +20817,7 @@ export class Shape extends GraphObject {
      *
      * The name can be any case but will always be canonicalized when set. For instance,
      * setting "opentriangle" will set the value of the arrowhead to "OpenTriangle".
-     * All of the predefined arrowheads are shown in the <a href="../../samples/arrowheads.html">Arrowheads sample</a>.
+     * All of the predefined arrowheads are shown in the <a href="../../samples/arrowheads">Arrowheads sample</a>.
      *
      * Setting this property may also set the {@link GraphObject.segmentIndex},
      * {@link GraphObject.segmentOrientation}, and {@link GraphObject.alignmentFocus} properties.
@@ -20880,7 +20880,7 @@ export class Shape extends GraphObject {
      * so it is commonplace to set the {@link stroke} to "transparent" and the {@link strokeWidth} to be as wide as
      * the height of the GraphObject being drawn along the stroke.
      *
-     * Examples of path patterns can be seen in the <a href="../../samples/relationships.html">Relationships sample</a>.
+     * Examples of path patterns can be seen in the <a href="../../samples/relationships">Relationships sample</a>.
      *
      * This property is ignored by the Shapes in "Grid" or "Graduated" Panels.
      */
@@ -20943,7 +20943,7 @@ export class Shape extends GraphObject {
      * The values are either string synonyms for other figure names, or functions
      * that take a {@link Shape} and a width and a height and return a {@link Geometry}.
      *
-     * The predefined shape figures can be seen in the <a href="../../samples/shapes.html">Shapes sample</a>.
+     * The predefined shape figures can be seen in the <a href="../../samples/shapes">Shapes sample</a>.
      */
     static getFigureGenerators(): Map<string, string | ((a: Shape, b: number, c: number) => Geometry)>;
     /**
@@ -20990,7 +20990,7 @@ export class Shape extends GraphObject {
      * The keys are arrowhead names.
      * The values are {@link Geometry} objects.
      *
-     * The predefined arrowheads can be seen in the <a href="../../samples/arrowheads.html">Arrowheads sample</a>.
+     * The predefined arrowheads can be seen in the <a href="../../samples/arrowheads">Arrowheads sample</a>.
      */
     static getArrowheadGeometries(): Map<string, Geometry>;
     /**
@@ -21098,7 +21098,7 @@ export declare enum TextFormat {
  * TextBlocks can be edited by users using the {@link TextEditingTool}.
  * The {@link HTMLInfo} that a given TextBlock uses as its text editor can be customized
  * by setting the {@link textEditor} property. For an example of custom text editing tool use,
- * see the <a href="../../samples/customTextEditingTool.html">Custom TextEditingTool Sample</a>.
+ * see the <a href="../../samples/customTextEditingTool">Custom TextEditingTool Sample</a>.
  * <p class="boxread">
  * For examples of TextBlock possibilities and functionality,
  * see the <a href="../../learn/textBlocks">Learn page on TextBlocks</a>.
@@ -21418,7 +21418,7 @@ export class TextBlock extends GraphObject {
      * The value should be set to an instance of {@link HTMLInfo}.
      * Setting this property might not affect any ongoing text editing operation.
      *
-     * For example usage, see the <a href="../../samples/customTextEditingTool.html">Custom TextEditingTool Sample</a>.
+     * For example usage, see the <a href="../../samples/customTextEditingTool">Custom TextEditingTool Sample</a>.
      */
     get textEditor(): HTMLInfo | null;
     set textEditor(value: HTMLInfo | null);
@@ -21581,7 +21581,7 @@ export class TextBlock extends GraphObject {
      * The value must be an array of strings.
      *
      * The default value is null.
-     * For example usage, see the <a href="../../samples/customTextEditingTool.html">Custom TextEditingTool Sample</a>.
+     * For example usage, see the <a href="../../samples/customTextEditingTool">Custom TextEditingTool Sample</a>.
      */
     get choices(): Array<string> | null;
     set choices(value: Array<string> | null);
@@ -25284,7 +25284,7 @@ export class PositionArray {
  * which are members of the group.
  * <p class="box">
  * For more discussion, see <a href="../../learn/groups">Learn page on Groups</a>.
- * See samples that make use of Groups in the <a href="../../samples/index.html#groups">samples index</a>.
+ * See samples that make use of Groups in the <a href="../../samples#groups">samples index</a>.
  *
  * Although you can create a Group and {@link Diagram.add} it to a Diagram, this does not update the Model.
  * It is more common to create a group by adding a node data object to the model
@@ -26666,8 +26666,8 @@ export declare enum GridSorting {
  * There are many samples that use GridLayout.
  * Every {@link Palette} uses a GridLayout by default.
  * <p class="box">
- * If you want to experiment interactively with most of the properties, try the <a href="../../samples/gLayout.html">Grid Layout</a> sample.
- * See samples that make use of GridLayout in the <a href="../../samples/index.html#gridlayout">samples index</a>.
+ * If you want to experiment interactively with most of the properties, try the <a href="../../samples/gLayout">Grid Layout</a> sample.
+ * See samples that make use of GridLayout in the <a href="../../samples#gridlayout">samples index</a>.
  *
  * By default this layout will sort all of the Parts alphabetically
  * (comparing {@link Part.text} values, respecting case)
@@ -29489,8 +29489,8 @@ export declare enum CircularNodeDiameterFormula {
  * There are several samples that use CircularLayout.
  * The layout cannot guarantee that it provides optimal positioning of nodes when trying to minimize link crossings.
  * <p class="boxrun">
- * If you want to experiment interactively with most of the properties, try the <a href="../../samples/cLayout.html">Circular Layout</a> sample.
- * See samples that make use of CircularLayout in the <a href="../../samples/index.html#circularlayout">samples index</a>.
+ * If you want to experiment interactively with most of the properties, try the <a href="../../samples/cLayout">Circular Layout</a> sample.
+ * See samples that make use of CircularLayout in the <a href="../../samples#circularlayout">samples index</a>.
  *
  * This layout makes use of a {@link LayoutNetwork} of
  * {@link CircularVertex}es and {@link CircularEdge}s that normally
@@ -29804,8 +29804,8 @@ export class CircularEdge extends LayoutEdge {
  * The layout cannot guarantee that it provides optimal positioning of nodes.
  * Nodes will normally not overlap each other, but when there is a dense interconnectivity overlaps might not be avoidable.
  * <p class="boxrun">
- * If you want to experiment interactively with most of the properties, try the <a href="../../samples/fdLayout.html">Force Directed Layout</a> sample.
- * See samples that make use of ForceDirectedLayout in the <a href="../../samples/index.html#force-directed">samples index</a>.
+ * If you want to experiment interactively with most of the properties, try the <a href="../../samples/fdLayout">Force Directed Layout</a> sample.
+ * See samples that make use of ForceDirectedLayout in the <a href="../../samples#force-directed">samples index</a>.
  * </p>
  *
  * This layout makes use of a {@link LayoutNetwork} of
@@ -30449,8 +30449,8 @@ export declare enum LayeredDigraphAlign {
  * This arranges nodes of directed graphs into layers (rows or columns).
  * There are many samples that use LayeredDigraphLayout.
  * <p class="boxrun">
- * If you want to experiment interactively with most of the properties, try the <a href="../../samples/ldLayout.html">Layered Digraph Layout</a> sample.
- * See samples that make use of LayeredDigraphLayout in the <a href="../../samples/index.html#layered-digraph">samples index</a>.
+ * If you want to experiment interactively with most of the properties, try the <a href="../../samples/ldLayout">Layered Digraph Layout</a> sample.
+ * See samples that make use of LayeredDigraphLayout in the <a href="../../samples#layered-digraph">samples index</a>.
  *
  * The {@link layerSpacing} property controls the distance between layers.
  * The {@link columnSpacing} property controls the breadth of each "column" --
@@ -31323,8 +31323,8 @@ export declare enum TreeLayerStyle {
  * This layout positions nodes of a tree-structured graph in layers (rows or columns).
  * <p class="boxrun">
  * For a discussion and examples of the most commonly used properties, see <a href="../../learn/trees">Trees</a> page in Learn.
- * If you want to experiment interactively with most of the properties, try the <a href="../../samples/tLayout.html">Tree Layout</a> sample.
- * See samples that make use of TreeLayout in the <a href="../../samples/index.html#treelayout">samples index</a>.
+ * If you want to experiment interactively with most of the properties, try the <a href="../../samples/tLayout">Tree Layout</a> sample.
+ * See samples that make use of TreeLayout in the <a href="../../samples#treelayout">samples index</a>.
  *
  * This layout makes use of a {@link LayoutNetwork} of
  * {@link TreeVertex}es and {@link TreeEdge}s that normally
@@ -33227,7 +33227,7 @@ export interface ThemeColors {
  * Some routers modify other aspects of Links.
  *
  * The most commonly used Router is the
- * <a href="AvoidsLinksRouter.html">AvoidsLinksRouter</a> extension
+ * <a href="../samples/AvoidsLinksRouter">AvoidsLinksRouter</a> extension
  * in the extensions or extensionsJSM directories.
  *
  * The Router class is abstract and does not really provide any functionality of its own.

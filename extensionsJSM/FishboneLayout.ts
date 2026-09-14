@@ -26,6 +26,9 @@ import go from 'gojs';
  * @category Layout Extension
  */
 export class FishboneLayout extends go.TreeLayout {
+  private _uniformBranches: boolean;
+  private _branchesRight: boolean;
+
   /**
    * Constructs a FishboneLayout and sets the following properties:
    *   - {@link TreeLayout.alignment} = {@link go.TreeAlignment.BusBranching}
@@ -37,7 +40,51 @@ export class FishboneLayout extends go.TreeLayout {
     this.alignment = go.TreeAlignment.BusBranching;
     this.setsPortSpot = false;
     this.setsChildPortSpot = false;
+    this._uniformBranches = false;
+    this._branchesRight = false;
     if (init) Object.assign(this, init);
+  }
+
+  /**
+   * Gets or sets whether detail branches are placed on one or both sides of each rib branch.
+   * The side of the rib for detail branches is determined by {@link branchesRight}.
+   *
+   * Default is false.
+   */
+  get uniformBranches(): boolean {
+    return this._uniformBranches;
+  }
+  set uniformBranches(val: boolean) {
+    val = !!val;
+    if (this._uniformBranches !== val) {
+      this._uniformBranches = val;
+      this.invalidateLayout();
+    }
+  }
+
+  /**
+   * Gets or sets which side of the rib the detail branches occupy when {@link uniformBranches} is true.
+   *
+   * Default is false.
+   */
+  get branchesRight(): boolean {
+    return this._branchesRight;
+  }
+  set branchesRight(val: boolean) {
+    val = !!val;
+    if (this._branchesRight !== val) {
+      this._branchesRight = val;
+      this.invalidateLayout();
+    }
+  }
+
+  /**
+   * Copies properties to a cloned Layout.
+   */
+  override cloneProtected(copy: this): void {
+    super.cloneProtected(copy);
+    copy._uniformBranches = this._uniformBranches;
+    copy._branchesRight = this._branchesRight;
   }
 
   /**
@@ -59,11 +106,29 @@ export class FishboneLayout extends go.TreeLayout {
     const verts = new go.List<go.TreeVertex>().addAll(
       net.vertexes.iterator as go.Iterator<go.TreeVertex>
     );
+    // horizontally-branching children that each need a zero-size row-mate dummy
+    const vertical = this.uniformBranches ? this.findVerticalVertexes(verts) : null;
     verts.each((v: go.TreeVertex) => {
       // ignore leaves of tree
       if (v.destinationEdges.count === 0) return;
       this.prepareParent(v, net as go.TreeNetwork);
-      if (v.destinationEdges.count % 2 === 1) {
+      if (vertical !== null && vertical.has(v)) {
+        // pair each real child with a zero-size dummy occupying the other half of its row
+        // the children order comes from the destinationEdges order
+        // interleaving the edges here places every real child on the side chosen by branchesRight
+        const realEdges: Array<go.LayoutEdge> = [];
+        v.destinationEdges.each((e) => realEdges.push(e));
+        realEdges.forEach((e) => v.deleteDestinationEdge(e));
+        realEdges.forEach((e) => {
+          if (!this.branchesRight) v.addDestinationEdge(e);
+          const dummy = net.createVertex();
+          dummy.bounds = new go.Rect();
+          dummy.focus = new go.Point();
+          net.addVertex(dummy);
+          net.linkVertexes(v, dummy, null);
+          if (this.branchesRight) v.addDestinationEdge(e);
+        });
+      } else if (v.destinationEdges.count % 2 === 1) {
         // if there's an odd number of real children, add two dummies
         const dummy = net.createVertex();
         dummy.bounds = new go.Rect();
@@ -86,6 +151,35 @@ export class FishboneLayout extends go.TreeLayout {
   prepareParent(v: go.TreeVertex, net: go.TreeNetwork) {}
 
   /**
+   * @hidden
+   * Collect the vertexes at odd depths from each root whose children branch off horizontally.
+   */
+  findVerticalVertexes(verts: go.List<go.TreeVertex>): go.Set<go.TreeVertex> {
+    const vertical = new go.Set<go.TreeVertex>();
+    const seen = new go.Set<go.TreeVertex>();
+    verts.each((r) => {
+      if (r.sourceEdges.count > 0 || r.destinationEdges.count === 0) return;
+      let frontier: Array<go.TreeVertex> = [r];
+      let odd = true;
+      while (frontier.length > 0) {
+        const next: Array<go.TreeVertex> = [];
+        for (const u of frontier) {
+          u.destinationEdges.each((e) => {
+            const w = e.toVertex as go.TreeVertex;
+            if (w === null || seen.has(w)) return;
+            seen.add(w);
+            if (odd) vertical.add(w);
+            next.push(w);
+          });
+        }
+        frontier = next;
+        odd = !odd;
+      }
+    });
+    return vertical;
+  }
+
+  /**
    * Add a direction property to each vertex and modify {@link go.TreeVertex.layerSpacing}.
    */
   override assignTreeVertexValues(v: go.TreeVertex): void {
@@ -98,6 +192,7 @@ export class FishboneLayout extends go.TreeLayout {
         v.layerSpacing -= v.bounds.width;
       } else {
         v.layerSpacing -= v.bounds.height;
+        if (this.uniformBranches) v.layerSpacing -= v.bounds.height;
       }
     }
   }
